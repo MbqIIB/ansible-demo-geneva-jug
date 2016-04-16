@@ -1,0 +1,6 @@
+---
+ec2_security_group: 'sg_ec2_demo'
+ec2_security_group_desc: 'Security Group for Ansible EC2 demo'
+ec2_region: 'eu-west-1'
+ec2_key_name: 'ansible_ec2_key'
+

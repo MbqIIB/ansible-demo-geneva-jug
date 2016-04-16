@@ -1,0 +1,29 @@
+---
+# common
+- hosts: ec2_hosts
+  gather_facts: true
+
+  pre_tasks:
+    - name: Gather EC2 facts
+      ec2_facts:
+
+  roles:
+    - {role: common, become: yes}
+
+
+# web
+- hosts: ec2_web
+  gather_facts: no
+  become: yes
+
+  roles:
+    - web
+
+
+# lb
+- hosts: ec2_lb
+  gather_facts: no
+  become: yes  
+
+  roles:
+    - lb

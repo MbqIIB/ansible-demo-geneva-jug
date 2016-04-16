@@ -1,0 +1,77 @@
+---
+- name: Provision an EC2 node
+  hosts: local
+  connection: local
+  gather_facts: False
+  tags: provisioning
+
+  vars:
+    ec2_instance_type: 't2.micro'
+    ec2_ami_id: 'ami-47a23a30' # Ubuntu Server 14.04 LTS
+              # 'ami-bff32ccc' # Amazon Linux AMI 2015.09.1
+    ec2_user: 'ubuntu'
+#    ec2_count: 2
+    ec2_instance_tags: "name=ansible-linux-test"
+
+  vars_prompt:
+    - name: "ec2_count"
+      prompt: "How many EC2 instances would you like to provision?"
+      private: no
+
+  tasks:
+    - name: Create a security group
+      ec2_group:
+        name: "{{ ec2_security_group }}"
+        description: "{{ ec2_security_group_desc }}"
+        region: "{{ ec2_region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: ICMP
+            from_port: 8            # icmp type, -1 = any type
+            to_port:  -1            # icmp subtype, -1 = any subtype
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: basic_fw
+
+    - name: create an EC2 instance
+      ec2:
+        region: "{{ ec2_region }}"
+        group: "{{ ec2_security_group }}"
+        instance_type: "{{ ec2_instance_type }}"
+        instance_tags: "{{ ec2_instance_tags }}"
+        image: "{{ ec2_ami_id }}"
+        key_name: "{{ ec2_key_name }}"
+        count: "{{ ec2_count }}"
+        state: present
+        wait: true
+      register: ec2
+
+    - name: Add instance to local host group
+      lineinfile:
+        dest: "/etc/ansible/hosts"
+        regexp: "{{ item.public_dns_name }}"
+        insertafter: '\[ec2_hosts\]'
+        line: "{{ item.public_dns_name }}"
+      with_items: ec2.instances
+
+    - name: Add instance to known hosts
+      shell: "ssh-keyscan {{ item.public_dns_name }} >> ~/.ssh/known_hosts"
+      with_items: ec2.instances
+
+    - name: Wait for SSH to come up
+      wait_for:
+        host: "{{ item.public_dns_name }}"
+        port: 22
+        delay: 60 
+        timeout: 320
+        state: started
+      with_items: ec2.instances

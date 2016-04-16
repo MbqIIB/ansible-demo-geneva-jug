@@ -1,0 +1,40 @@
+---
+- name: install nginx
+  apt: name=nginx state=installed
+
+- name: write our nginx.conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: write our /etc/nginx/sites-available/default
+  template: src=default-site.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: clean existing website content
+  file: path=/usr/share/nginx state=absent
+  tags: rolling
+
+- name: create website directory structure
+  file: path="/usr/share/{{ item }}" state=directory
+  with_items:
+    - nginx/html
+#    - nginx/img
+  tags: rolling
+
+- name: deploy HTML content
+  template: src=index.html.j2 dest=/usr/share/nginx/html/index.html
+  tags: rolling
+
+#- name: deploy img content
+#  copy: src={{ item }} dest=/usr/share/nginx/img/
+#  with_fileglob:
+#    - serial.ico
+#    - serial-logo.gif
+#  tags: rolling
+
+
+
+#- name: deploy website content
+#  git: repo=https://github.com/sebfere/ansible-tech-talk
+#       dest=/usr/share/nginx/
+#       version={{ app_version }

@@ -1,0 +1,24 @@
+<html>
+<title>Serial Demo</title>
+
+<style>
+  .block {text-align: center;margin-bottom:10px;}
+  .block:before {content: '';display: inline-block;height: 100%;vertical-align: middle;margin-right: -0.25em;}
+  .centered {display: inline-block;vertical-align: middle;width: 1000px;}
+</style>
+
+<link rel="shortcut icon" href="../img/serial.ico">
+
+<body>
+<div class="block" style="height: 99%;">
+    <div class="centered">
+<!--
+        <img src="http://{{ inventory_hostname }}/img/serial-logo.gif" alt="Serial Developpement" style="width:348px;height:84px" />
+-->
+        <h1>Serial Demo<h1>
+        <h1>Ansible - Config Mgmt & Deployment automation</h1>
+        <h2>Served by {{ inventory_hostname }} ({{ ansible_eth0.ipv4.address }}).</h2>
+    </div>
+</div>
+</body>
+</html>

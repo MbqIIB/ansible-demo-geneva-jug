@@ -1,0 +1,6 @@
+[local]
+localhost ansible_connection=local
+
+[ec2_hosts]
+
+[ec2_win_hosts]

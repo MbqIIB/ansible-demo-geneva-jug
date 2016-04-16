@@ -1,0 +1,29 @@
+---
+- hosts: "{{ target }}"
+  gather_facts: true
+  serial: 1
+
+  tasks:
+    - name: Gather EC2 facts
+      ec2_facts:
+ 
+    - debug: msg="{{ ansible_ec2_instance_id }}"
+ 
+    - name: Terminate instance
+      ec2:
+        region: "{{ ec2_region }}"
+        instance_ids: "{{ ansible_ec2_instance_id }}"
+        state: absent
+        wait: true
+      delegate_to: localhost
+
+    - name: Remove from known hosts
+      shell: "ssh-keygen -R {{ inventory_hostname }}"
+      delegate_to: localhost
+
+    - name: Remove from host inventory
+      lineinfile:
+        dest: "/etc/ansible/hosts"
+        regexp: "^{{ inventory_hostname }}"
+        state: absent
+      delegate_to: localhost

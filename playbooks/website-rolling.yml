@@ -1,0 +1,52 @@
+---
+# common
+- hosts: ec2_hosts
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Gather EC2 facts
+      ec2_facts:
+
+  roles:
+    - {role: common, become: yes}
+
+# lb
+- hosts: ec2_lb
+  gather_facts: no
+  become: yes
+
+  roles:
+    - lb
+    
+# web
+- hosts: ec2_web
+  gather_facts: no
+  become: yes
+  serial: 1
+
+  pre_tasks:
+    - name: disable server in haproxy
+      shell: echo "disable server serial/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      delegate_to: "{{ item }}"
+      with_items: groups.ec2_lb
+      tags: rolling
+
+  roles:
+    - web
+
+  post_tasks:
+    - name: test website url
+      uri: url=http://{{ inventory_hostname }}
+      delegate_to: localhost
+      tags: rolling
+
+    - name: test website image
+      uri: url=http://{{ inventory_hostname }}/img/serial-logo.gif
+      delegate_to: localhost
+      tags: rolling
+
+    - name: enable server in haproxy
+      shell: echo "enable server serial/{{ inventory_hostname }}" | socat stdio /var/lib/haproxy/stats
+      delegate_to: "{{ item }}"
+      with_items: groups.ec2_lb
+      tags: rolling

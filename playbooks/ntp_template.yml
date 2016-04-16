@@ -1,0 +1,36 @@
+---
+- hosts: "{{ target }}"
+  become: yes
+  gather_facts: no
+
+  vars:
+    ntp_hosts:
+      - 0.ubuntu.pool.ntp.org
+      - 1.ubuntu.pool.ntp.org
+      - 2.ubuntu.pool.ntp.org
+      - 3.ubuntu.pool.ntp.org
+
+  tasks:
+    - name: Install ntp
+      apt: name=ntp state=latest update_cache=yes force=yes
+
+    - name: Write our ntp.conf
+      template:
+        src: /etc/ansible/playbooks/templates/ntp.conf.j2
+        dest: /etc/ntp.conf
+        mode: 644
+        owner: root
+        group: root
+      notify: Restart ntp
+
+    - name: Start ntp
+      service: name=ntp state=started
+
+#    - name: Remove ntp
+#      apt: name=ntp state=absent force=yes
+#      tags:
+#        - uninstall
+
+  handlers:
+    - name: Restart ntp
+      service: name=ntp state=restarted
