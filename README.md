@@ -27,9 +27,9 @@ ansible-playbook playbooks/ec2_provision.yml
 
 In this demo, we walk through basic concepts of Ansible and core Configuration principles:
 
-- **Static inventory** to declare hosts of the demo
+- **Static inventory** to [declare hosts](http://docs.ansible.com/ansible/intro_inventory.html) of the demo
 
-- **Patterns** to select hosts with `ansible --list-hosts`
+- **Patterns** to [select hosts](http://docs.ansible.com/ansible/intro_patterns.html) with `ansible --list-hosts`
   - host name or group name
   - mix of groups (union, intersection)
   - wildcard
@@ -37,13 +37,13 @@ In this demo, we walk through basic concepts of Ansible and core Configuration p
 
 - Ops Hello World with `ansible -m ping`
 
-- Gather **Ansible facts** with `ansible -m setup`
+- Gather **Ansible facts** (data from remote machines) with `ansible -m setup`
 
-- Test basic ad-hoc commands wtih `ansible -m shell`
+- Test basic [ad-hoc commands](http://docs.ansible.com/ansible/intro_adhoc.html) with `ansible -m shell`
 
 - **Idempotence** principle by executing the same command twice
 
-- **Configuration Drift** leading to [Snowflake servers]() by uninstalling a package rather than reprovisioning from scrath with [Phoenix servers]()
+- **Configuration Drift** leading to [Snowflake servers](http://martinfowler.com/bliki/SnowflakeServer.html) by uninstalling a package rather than reprovisioning from scrath with [Phoenix servers](http://martinfowler.com/bliki/PhoenixServer.html)
 
 ```
 # navigate through the inventory
@@ -82,15 +82,15 @@ ansible -m apt -a "name=ntp state=absent" --sudo <host>
 
 In this demo, we walk through automation concepts of Ansible:
 
-- **Playbooks** to express the desired state
+- **Playbooks** to express the sequence of tasks to obtain the "desired state"
 
 - **Variables** associated to hosts and groups
 
-- **Jinja2 templates** to generate the configuration
+- **Jinja2 templates** to [generate the configuration](http://docs.ansible.com/ansible/playbooks_filters.html)
 
 - **host-contextual variables** with `ansible -m debug "var=hostvars['<host>']" localhost`
 
-- playbook **tags** to execute it partially
+- playbook **tags** to [execute it partially](http://docs.ansible.com/ansible/playbooks_tags.html)
 
 ```
 # script to install the NTP package and configure it thanks to a Jinja2 template
